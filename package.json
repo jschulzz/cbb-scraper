@@ -1,0 +1,18 @@
+{
+  "name": "CollegeBasketball",
+  "packageManager": "yarn@3.1.0",
+  "type": "module",
+  "devDependencies": {
+    "@types/esm": "^3",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^16.11.6",
+    "esm": "^3.2.25",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
+    "mongoose": "^6.0.12"
+  }
+}
