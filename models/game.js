@@ -5,6 +5,7 @@ const gameStats = {
   ...stats,
   win: Boolean,
   home: Boolean,
+  team: String,
   players: [player],
 };
 

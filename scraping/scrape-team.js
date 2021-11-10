@@ -2,37 +2,16 @@ import axios from "axios";
 import cheerio from "cheerio";
 
 import { Team } from "../models/index.js";
+import { scrapeStatRow } from "./utils.js";
 import { openConnection, closeConnection } from "../database/util.js";
 
 const { BASE_URL } = process.env;
 
-export const scrapeStatRow = (row) => {
-  const stats = [
-    { db_stat: "fgm", web_stat: "fg_per_g" },
-    { db_stat: "fga", web_stat: "fga_per_g" },
-    { db_stat: "2pm", web_stat: "fg2_per_g" },
-    { db_stat: "2pa", web_stat: "fg2a_per_g" },
-    { db_stat: "3pm", web_stat: "fg3_per_g" },
-    { db_stat: "3pa", web_stat: "fg3a_per_g" },
-    { db_stat: "ftm", web_stat: "ft_per_g" },
-    { db_stat: "fta", web_stat: "fta_per_g" },
-    { db_stat: "orb", web_stat: "orb_per_g" },
-    { db_stat: "drb", web_stat: "drb_per_g" },
-    { db_stat: "trb", web_stat: "trb_per_g" },
-    { db_stat: "ast", web_stat: "ast_per_g" },
-    { db_stat: "stl", web_stat: "stl_per_g" },
-    { db_stat: "blk", web_stat: "blk_per_g" },
-    { db_stat: "tov", web_stat: "tov_per_g" },
-    { db_stat: "pf", web_stat: "pf_per_g" },
-    { db_stat: "pts", web_stat: "pts_per_g" },
-  ];
-
-  const results = {};
-
-  stats.forEach(({ db_stat, web_stat }) => {
-    results[db_stat] = +row.find(`td[data-stat=${web_stat}]`).text().trim();
-  });
-  return results;
+const scrapePlayerRow = (row) => {
+  const stats = scrapeStatRow(row);
+  const name = row.find("td[data-stat=player]").attr("csk");
+  const minutes = +row.find("td[data-stat=mp_per_g]").text().trim();
+  return { ...stats, name, started: false, minutes };
 };
 
 export const scrapeTeam = async (url) => {
@@ -95,8 +74,16 @@ export const scrapeTeam = async (url) => {
   const teamStatRow = $("#schools_per_game")
     .find("tbody")
     .find("tr:nth-child(1)");
+
+  const players = $("#per_game")
+    .find("tbody")
+    .find("tr")
+    .map((idx, _el) => {
+      return scrapePlayerRow($(_el));
+    })
+    .toArray();
   const stats = scrapeStatRow(teamStatRow);
-  console.log(stats);
+  console.log(players);
 
   await Team.updateOne(
     { name: school_name },
@@ -115,6 +102,7 @@ export const scrapeTeam = async (url) => {
         wins: +record.split("-")[0],
         losses: +record.split("-")[1],
         year: 2021,
+        players,
       },
     },
     { upsert: true }

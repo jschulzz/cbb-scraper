@@ -21,5 +21,6 @@ export const stats = {
 export const player = {
   ...stats,
   name: String,
+  minutes: Number,
   started: Boolean,
 };
