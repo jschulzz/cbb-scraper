@@ -22,8 +22,8 @@ export const scrapeStatRow = (row, options) => {
   const results = {};
 
   stats.forEach(({ db_stat, web_stat }) => {
-    if(options.box){
-        web_stat = web_stat.slice(0, -6)
+    if (options?.box) {
+      web_stat = web_stat.slice(0, -6);
     }
     results[db_stat] = +row.find(`td[data-stat=${web_stat}]`).text().trim();
   });

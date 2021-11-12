@@ -30,47 +30,20 @@ export const scrapeTeam = async (url) => {
   const full_name = $("img.teamlogo").attr("alt").slice(0, -5).trim();
 
   const header = $("div[data-template=Partials/Teams/Summary]");
-  const [_record, _coach, _scored, _allowed, _srs, _sos, _o_rtg, _drtg] =
-    header.find("p");
-  const record = $(_record).text().replace(/\s/g, " ").trim().split(" ")[1];
-  const coach = $(_coach).text().replace(/\s/g, " ").trim().split(": ")[1];
-  const scored = +$(_scored)
-    .text()
-    .replace(/\s/g, " ")
-    .trim()
-    .split(": ")[1]
-    .split(" ")[0];
-  const allowed = +$(_allowed)
-    .text()
-    .replace(/\s/g, " ")
-    .trim()
-    .split(": ")[1]
-    .split(" ")[0];
-  const srs = +$(_srs)
-    .text()
-    .replace(/\s/g, " ")
-    .trim()
-    .split(": ")[1]
-    .split(" ")[0];
-  const sos = +$(_sos)
-    .text()
-    .replace(/\s/g, " ")
-    .trim()
-    .split(": ")[1]
-    .split(" ")[0];
-  const o_rtg = +$(_o_rtg)
-    .text()
-    .replace(/\s/g, " ")
-    .trim()
-    .split(": ")[1]
-    .split(" ")[0];
-  const d_rtg = +$(_drtg)
-    .text()
-    .replace(/\s/g, " ")
-    .trim()
-    .split(": ")[1]
-    .split(" ")[0];
-
+  const topStats = {};
+  const paragraphs = header.find("p");
+  paragraphs.each((i, el) => {
+    const label = $(el).find("strong").text().replace(/\s/g, " ").trim();
+    topStats[label] = $(el).text().replace(/\s/g, " ").trim().split(": ")[1];
+  });
+  const record = topStats["Record:"].split(" ")[0];
+  const coach = topStats["Coach:"];
+  const scored = +topStats["PS/G:"].split(" ")[0];
+  const allowed = +topStats["PA/G:"].split(" ")[0];
+  const srs = topStats["SRS:"] ? +topStats["SRS:"].split(" ")[0] : undefined;
+  const sos = topStats["SOS:"] ? +topStats["SOS:"].split(" ")[0] : undefined;
+  const o_rtg = +topStats["ORtg:"].split(" ")[0];
+  const d_rtg = +topStats["DRtg:"].split(" ")[0];
   const teamStatRow = $("#schools_per_game")
     .find("tbody")
     .find("tr:nth-child(1)");
@@ -83,7 +56,6 @@ export const scrapeTeam = async (url) => {
     })
     .toArray();
   const stats = scrapeStatRow(teamStatRow);
-  console.log(players);
 
   await Team.updateOne(
     { name: school_name },
@@ -107,9 +79,4 @@ export const scrapeTeam = async (url) => {
     },
     { upsert: true }
   );
-  closeConnection();
-
-  //   mongoose.connection.close();
 };
-
-scrapeTeam("https://www.sports-reference.com/cbb/schools/kentucky/2021.html");

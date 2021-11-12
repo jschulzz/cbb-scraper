@@ -17,9 +17,13 @@ export const scrapeGame = async (url) => {
   const $ = cheerio.load(response.data);
 
   const date = $("h1").text().trim().split("Score,")[1].trim();
-  const teamIds = $("#inner_nav ul .full a")
-    .map((i, el) => $(el).attr("href").split("/")[3])
-    .toArray();
+  const teamIds = $("#inpage_nav ul li a")
+    .map((i, el) => $(el).attr("href"))
+    .toArray()
+    .filter((href) => href.includes("box-score-basic"))
+    .map((href) => href.slice(21));
+
+//   console.log(teamIds);
 
   const teams = teamIds.map((teamId) => {
     const box = $(`table#box-score-basic-${teamId}`);
@@ -63,9 +67,4 @@ export const scrapeGame = async (url) => {
     { upsert: true }
   );
 
-  closeConnection();
 };
-
-scrapeGame(
-  "https://www.sports-reference.com/cbb/boxscores/2020-11-25-18-kentucky.html"
-);
