@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
-import { player, stats } from "./util.js";
+import { stats } from "./util.js";
 
 export const teamSchema = new mongoose.Schema({
+  id: String,
   ...stats,
   points_allowed: Number,
   sos: Number,
@@ -13,9 +14,10 @@ export const teamSchema = new mongoose.Schema({
   name: String,
   year: Number,
   scraped: Date,
+  conference: String,
   logo_url: String,
   mascot: String,
-  players: [player],
+  player_ids: [String],
 });
 
 export const Team = mongoose.model("teams", teamSchema);

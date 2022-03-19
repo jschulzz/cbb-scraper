@@ -1,19 +1,20 @@
 import mongoose from "mongoose";
-import { stats, player } from "./util.js";
+import { stats } from "./util.js";
 
 const gameStats = {
   ...stats,
   win: Boolean,
   home: Boolean,
-  team: String,
-  players: [player],
+  team_id: String,
+  performance_ids: [String],
 };
 
 export const gameSchema = new mongoose.Schema({
-  teams: [gameStats],
+  id: String,
   link: String,
   date: Date,
   scraped: Date,
+  teams: [gameStats],
 });
 
 export const Game = mongoose.model("games", gameSchema);

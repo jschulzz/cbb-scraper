@@ -5,10 +5,7 @@ import cheerio from "cheerio";
 import { scrapeGame } from "./scrape-game.js";
 import { scrapeTeam } from "./scrape-team.js";
 
-const url = `${BASE_URL}/cbb/boxscores`;
-// const url = `${BASE_URL}/cbb/boxscores/index.cgi?month=11&day=9&year=2021`;
-
-const scrapePage = async () => {
+const scrapeDayOfGames = async (url) => {
   const response = await axios.get(url);
   const $ = cheerio.load(response.data);
 
@@ -27,4 +24,18 @@ const scrapePage = async () => {
   }
 };
 
-scrapePage();
+const endDate = new Date(2022, 3, 15);
+for (
+  let date = new Date(2022, 2, 1 );
+  date <= endDate;
+  date.setDate(date.getDate() + 1)
+) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  //   const url = `${BASE_URL}/cbb/boxscores`;
+  const url = `${BASE_URL}/cbb/boxscores/index.cgi?month=${month}&day=${day}&year=${year}`;
+  console.log(`Scraping ${year}-${month}-${day}`);
+  await scrapeDayOfGames(url);
+}

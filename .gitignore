@@ -10,3 +10,6 @@
 # Documentation here: https://yarnpkg.com/features/zero-installs
 /node_modules
 /env.sh
+/elasticsearch/.env
+graphFile.json
+yarn-error.log
