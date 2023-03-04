@@ -1,6 +1,6 @@
 import bodybuilder from "bodybuilder";
 import { client } from "../elasticsearch/client.js";
-import { basicStats as stats } from "../datafiles/stats";
+import { basicStats as stats } from "../datafiles/stats.js";
 
 export const getTeamCorrelations = async (team) => {
   const correlations = [];

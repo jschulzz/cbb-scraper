@@ -1,7 +1,7 @@
 import bodybuilder from "bodybuilder";
+import { createClient } from "redis";
 import { getOpponentAvgCorrelation } from "../analysis/opponent-avg-correlation.js";
 import { client } from "../elasticsearch/client.js";
-
 
 const PRINT_DETAILS = true;
 const TELL_DEPTH = 5;
@@ -84,6 +84,18 @@ const evaluateMatchup = async (team, opponent) => {
 };
 
 export const compareTeams = async (team1, team2) => {
+//   const client = createClient();
+//   await client.connect();
+
+  const label = [team1, team2].sort();
+
+//   const key = JSON.stringify(label);
+//   const cachedValue = await client.get(key);
+//   if (cachedValue) {
+//     const result = JSON.parse(cachedValue);
+//     return result;
+//   }
+
   const team1winrates = await evaluateMatchup(team1, team2);
   const team2winrates = await evaluateMatchup(team2, team1);
 
@@ -119,10 +131,14 @@ export const compareTeams = async (team1, team2) => {
     ).toFixed(0)}% `
   );
 
-  return {
+  const result = {
     winner: weightedAvgWinRate > 0.5 ? team1 : team2,
     likelihood: Math.max(weightedAvgWinRate, 1 - weightedAvgWinRate),
   };
+
+//   await client.set(key, JSON.stringify(result));
+
+  return result;
 };
 
-compareTeams("illinois", "chattanooga");
+compareTeams("duke", "north-carolina");

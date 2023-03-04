@@ -71,7 +71,7 @@ export const getOpponentAvgCorrelation = async (team) => {
     // console.log(stat, values);
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
-    const interval = (maxVal - minVal) / 100;
+    const interval = (maxVal - minVal) / 20;
     if (minVal === maxVal) {
       continue;
     }
