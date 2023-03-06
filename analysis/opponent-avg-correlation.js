@@ -55,11 +55,11 @@ export const getOpponentAvgCorrelation = async (team) => {
         size: 1,
         ...getOpponentAvgs,
       });
-      if (opponentAvgs.hits.hits.length) {
+      // filters for only clear wins
+      if (opponentAvgs.hits.hits.length && Math.abs(performance._source.pts - performance._source.opponent_pts) > 3) {
         results.push({
           stat: opponentAvgs.hits.hits[0]._source[stat],
-          //   win: performance._source.win,
-          win: performance._source.pts - performance._source.opponent_pts > 3,
+            win: performance._source.win,
           team: performance._source.team_id,
           opponent: performance._source.opponent_team_id,
         });
@@ -87,6 +87,7 @@ export const getOpponentAvgCorrelation = async (team) => {
       const B = results.filter((x) => x.stat >= i && !x.win).length;
       const C = results.filter((x) => x.stat < i && x.win).length;
       const D = results.filter((x) => x.stat < i && !x.win).length;
+
       let r = 1;
       if (A * D !== 0) {
         r = Math.cos(Math.PI / (1 + Math.sqrt((B * C) / (A * D))));

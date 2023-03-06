@@ -1,22 +1,23 @@
-import axios from "axios";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
 import { openConnection, closeConnection } from "../database/util.js";
 import { Game, Team, Performance, Player } from "../models/index.js";
+import { makeRequest } from "./requester.js";
 import { scrapeStatRow } from "./utils.js";
 const { BASE_URL } = process.env;
 
 export const scrapeGame = async (url) => {
-  openConnection();
+  await openConnection();
+  console.log("Scraping Game", url)
 
   if (!url.includes("https:")) {
     url = `${BASE_URL}${url}`;
   }
+  const response = await makeRequest(url);
 
-  const response = await axios.get(url);
-  const $ = cheerio.load(response.data);
+  const $ = load(response.data);
 
-  const date = $("h1").text().trim().split("Score,")[1].trim();
+  const date = $("h1").text().trim().split("Score (Men),")[1].trim();
   const teamIds = $("#inpage_nav ul li a")
     .map((i, el) => $(el).attr("href"))
     .toArray()
@@ -53,7 +54,7 @@ export const scrapeGame = async (url) => {
         {
           $set: {
             id: performance.player_id,
-            name: performance.player_name, 
+            name: performance.player_name,
             team_id: teamId,
           },
         },

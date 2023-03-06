@@ -25,7 +25,7 @@ const calculatePER = (player) => {
 const run = async () => {
   await openConnection();
 
-    const allTeams = (await Team.find({ name: "kentucky" }))
+    const allTeams = (await Team.find({ name: "gonzaga" }))
   //   const allTeams = (await Team.find({}))
 //   const allTeams = (
 //     await Team.find({

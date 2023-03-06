@@ -1,19 +1,26 @@
 const { BASE_URL } = process.env;
-import axios from "axios";
-import cheerio from "cheerio";
+import { load } from "cheerio";
+import { makeRequest } from "./requester.js";
 
 import { scrapeGame } from "./scrape-game.js";
 import { scrapeTeam } from "./scrape-team.js";
 
 const scrapeDayOfGames = async (url) => {
-  const response = await axios.get(url);
-  const $ = cheerio.load(response.data);
+  console.log("Scraping Scoreboard Day", url)
+  const response = await makeRequest(url);
+  const $ = load(response.data);
 
-  const gameLinks = $("td.gamelink")
-    .map((i, el) => {
-      return $(el).find("a").attr("href");
+  const gameLinks = $("table.teams")
+    .filter((i, el) => {
+      return $(el).find("td.desc").text().trim() === "Men's";
     })
-    .toArray();
+    .filter((i, el) => {
+      return $(el).find("a").map((j, a) => $(a).attr("href")).length === 3;
+    })
+    .map((i, el) => {
+      return $(el).find("td.gamelink a").attr("href");
+    })
+    .toArray().filter(x => !!x);
 
   for (const gameLink of gameLinks) {
     try {
@@ -24,9 +31,9 @@ const scrapeDayOfGames = async (url) => {
   }
 };
 
-const endDate = new Date(2022, 3, 15);
+const endDate = new Date(2023, 2, 5);
 for (
-  let date = new Date(2022, 2, 1 );
+  let date = new Date(2023, 2, 3);
   date <= endDate;
   date.setDate(date.getDate() + 1)
 ) {

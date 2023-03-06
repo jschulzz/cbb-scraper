@@ -3,7 +3,7 @@ import { getTeamCorrelations } from "./team-stat-correlation.js";
 import { getOpponentAvgCorrelation } from "./opponent-avg-correlation.js";
 
 const run = async () => {
-  const teams = ["villanova"];
+  const teams = ["kentucky"];
   let correlations = [];
   for (const team of teams) {
     console.log(team);

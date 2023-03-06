@@ -1,9 +1,9 @@
-import axios from "axios";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
 import { Team, Player } from "../models/index.js";
 import { scrapeStatRow } from "./utils.js";
 import { openConnection, closeConnection } from "../database/util.js";
+import { makeRequest } from "./requester.js";
 
 const { BASE_URL } = process.env;
 
@@ -15,15 +15,15 @@ const scrapePlayerRow = (row) => {
 };
 
 export const scrapeTeam = async (url) => {
-  openConnection();
+  await openConnection();
 
   if (!url.includes("https:")) {
     url = `${BASE_URL}${url}`;
   }
 
-  const response = await axios.get(url);
+  const response = await makeRequest(url);
 
-  const $ = cheerio.load(response.data);
+  const $ = load(response.data);
 
   const school_name = url.split("/")[5];
   const logo_url = $("img.teamlogo").attr("src");
@@ -46,15 +46,18 @@ export const scrapeTeam = async (url) => {
   const fullRecord = topStats["Record:"].split(" ");
   const record = fullRecord[0];
   const conference = fullRecord.join(" ").split("in ")[1].slice(0, -1);
-  const teamStatRow = $("#schools_per_game")
+  const teamStatRow = $("#season-total_per_game")
     .find("tbody")
     .find("tr:nth-child(1)");
+
 
   const players = $("#per_game")
     .find("tbody")
     .find("tr")
+    // console.log(school_name)
+    // console.log(playerRows.html())
     .map((idx, _el) => {
-        const stats = scrapePlayerRow($(_el));
+      const stats = scrapePlayerRow($(_el));
       return {
         player_id: stats.id,
         player_name: stats.name,

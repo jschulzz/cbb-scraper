@@ -66,10 +66,11 @@ const generateGraph = async () => {
   await openConnection();
   const allGames = await Game.find({});
   const graph = new Graph({ multi: true });
-
+  
   for (const game of allGames) {
-    const winnerName = game.toObject().teams.find((team) => team.win).team;
-    const loserName = game.toObject().teams.find((team) => !team.win).team;
+    const winnerName = game.toObject().teams.find((team) => team.win).team_id;
+    const loserName = game.toObject().teams.find((team) => !team.win).team_id;
+    // console.log(game.toObject())
 
     const winner = await Team.findOne({ name: winnerName });
     const loser = await Team.findOne({ name: loserName });
@@ -93,14 +94,14 @@ const generateGraph = async () => {
 const buildGraph = async () => {
   const graph = new Graph({ multi: true });
   graph.import(JSON.parse(readFileSync("graphFile.json")));
-  //   const graph = await generateGraph();
+    // const graph = await generateGraph();
   //   console.log(graph);
   return graph;
 };
 
 const run = async () => {
   const graph = await buildGraph();
-  const paths = DFS(graph, "kentucky", "kentucky", 16)
+  const paths = DFS(graph, "kentucky", "gonzaga", 16)
     .sort((a, b) => (a.length < b.length ? 1 : -1))
     .slice(0, 1);
 

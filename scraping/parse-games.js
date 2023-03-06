@@ -4,7 +4,7 @@ import { scrapeTeam } from "./scrape-team.js";
 const { BASE_URL } = process.env;
 
 const run = async () => {
-  openConnection();
+  await openConnection();
 
   const allGames = await Game.find({});
   console.log("Total games:", allGames.length);
@@ -18,7 +18,7 @@ const run = async () => {
 
   for (const [index, team] of Array.from(allTeams).entries()) {
     // https://www.sports-reference.com/cbb/schools/california-baptist/2022.html
-    const url = `${BASE_URL}/cbb/schools/${team}/2022.html`;
+    const url = `${BASE_URL}/cbb/schools/${team}/2023.html`;
     const [recordedTeam] = await Team.find({ link: url });
     const now = new Date();
     const yesterday = now.setDate(now.getDate() - 1);

@@ -144,7 +144,6 @@ const indexTeams = async (teams) => {
   const { body: bulkResponse } = await client.bulk({ refresh: true, body });
 
   console.log("Submitted");
-  console.log(body[1]);
 
   if (bulkResponse?.errors) {
     const erroredDocuments = [];

@@ -1,8 +1,8 @@
-import axios from "axios";
 import cheerio from "cheerio";
 import { client } from "../elasticsearch/client.js";
 import { openConnection } from "../database/util.js";
 import { Team } from "../models/index.js";
+import { makeRequest } from "../scraping/requester.js";
 
 const indexGames = async (games) => {
   const body = games.flatMap((game) => {
@@ -46,7 +46,7 @@ const indexGames = async (games) => {
 
 export const scrapeGames = async (year, team) => {
   const url = `https://www.sports-reference.com/cbb/schools/${team}/${year}-gamelogs.html`;
-  const response = await axios.get(url);
+  const response = await makeRequest(url);
   const $ = cheerio.load(response.data);
 
   const games = [];

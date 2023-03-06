@@ -36,8 +36,7 @@ const printTell = ({
         1
       )}% (${record}) when opponents average ${correlation.value.toFixed(
         precision
-      )} or ${
-        difference > 0 ? "more" : "less"
+      )} or ${difference > 0 ? "more" : "less"
       } ${statLabel} (r=${correlation.r.toFixed(3)})`
     );
     console.log(`This favors ${favorite}`);
@@ -84,17 +83,17 @@ const evaluateMatchup = async (team, opponent) => {
 };
 
 export const compareTeams = async (team1, team2) => {
-//   const client = createClient();
-//   await client.connect();
+  //   const client = createClient();
+  //   await client.connect();
 
   const label = [team1, team2].sort();
 
-//   const key = JSON.stringify(label);
-//   const cachedValue = await client.get(key);
-//   if (cachedValue) {
-//     const result = JSON.parse(cachedValue);
-//     return result;
-//   }
+  //   const key = JSON.stringify(label);
+  //   const cachedValue = await client.get(key);
+  //   if (cachedValue) {
+  //     const result = JSON.parse(cachedValue);
+  //     return result;
+  //   }
 
   const team1winrates = await evaluateMatchup(team1, team2);
   const team2winrates = await evaluateMatchup(team2, team1);
@@ -136,9 +135,9 @@ export const compareTeams = async (team1, team2) => {
     likelihood: Math.max(weightedAvgWinRate, 1 - weightedAvgWinRate),
   };
 
-//   await client.set(key, JSON.stringify(result));
+  //   await client.set(key, JSON.stringify(result));
 
   return result;
 };
 
-compareTeams("duke", "north-carolina");
+compareTeams('kentucky', 'duke')
