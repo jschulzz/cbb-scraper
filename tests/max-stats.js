@@ -22,11 +22,11 @@ export const getMaxAverages = (dataset, dataTransformer, initialValue) => {
 };
 
 const run = async () => {
-  openConnection();
+  await openConnection();
 
   const allPlayers = (await Team.find({}))
     .map((team) =>
-      team.toObject().players.map((player) => {
+      team.toObject().player_ids.map((player) => {
         return { ...player, team: team.name };
       })
     )

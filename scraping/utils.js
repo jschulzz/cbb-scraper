@@ -17,6 +17,7 @@ export const scrapeStatRow = (row, options) => {
     { db_stat: "tov", web_stat: "tov_per_g" },
     { db_stat: "pf", web_stat: "pf_per_g" },
     { db_stat: "pts", web_stat: "pts_per_g" },
+    { db_stat: "minutes", web_stat: "mp_per_g" },
   ];
 
   const results = {};

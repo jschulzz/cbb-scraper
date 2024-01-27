@@ -4,26 +4,28 @@ import { scrapeTeam } from "./scrape-team.js";
 const { BASE_URL } = process.env;
 
 const run = async () => {
-  openConnection();
+  await openConnection();
 
   const allGames = await Game.find({});
-  console.log(allGames.length);
+  console.log("Total games:", allGames.length);
   const allTeams = new Set();
   for (const game of allGames) {
-    allTeams.add(game.teams[0].team);
-    allTeams.add(game.teams[1].team);
+    allTeams.add(game.teams[0].team_id);
+    allTeams.add(game.teams[1].team_id);
   }
-  console.log(allTeams);
 
-  for (const team of allTeams) {
+//   console.log(allTeams)
+
+  for (const [index, team] of Array.from(allTeams).entries()) {
     // https://www.sports-reference.com/cbb/schools/california-baptist/2022.html
-    const url = `${BASE_URL}/cbb/schools/${team}/2022.html`;
+    const url = `${BASE_URL}/cbb/schools/${team}/2023.html`;
     const [recordedTeam] = await Team.find({ link: url });
     const now = new Date();
     const yesterday = now.setDate(now.getDate() - 1);
 
     const grabTeam = async (url) => {
       try {
+        console.log(`Parsing ${index}/${allTeams.size}`);
         await scrapeTeam(url);
       } catch (error) {
         if (error.response?.status === 404) {
@@ -34,14 +36,14 @@ const run = async () => {
       }
     };
 
-    if (recordedTeam && recordedTeam.scraped < yesterday) {
+    // if (recordedTeam && recordedTeam.scraped < yesterday) {
       await grabTeam(url);
-    } else if (!recordedTeam) {
-      await grabTeam(url);
-    }
+    // } else if (!recordedTeam) {
+    //   await grabTeam(url);
+    // }
   }
 
-//   closeConnection();
+  //   closeConnection();
 };
 
 run();

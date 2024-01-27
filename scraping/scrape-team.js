@@ -1,29 +1,29 @@
-import axios from "axios";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 
-import { Team } from "../models/index.js";
+import { Team, Player } from "../models/index.js";
 import { scrapeStatRow } from "./utils.js";
-import { openConnection } from "../database/util.js";
+import { openConnection, closeConnection } from "../database/util.js";
+import { makeRequest } from "./requester.js";
 
 const { BASE_URL } = process.env;
 
 const scrapePlayerRow = (row) => {
   const stats = scrapeStatRow(row);
-  const name = row.find("td[data-stat=player]").attr("csk");
-  const minutes = +row.find("td[data-stat=mp_per_g]").text().trim();
-  return { ...stats, name, started: false, minutes };
+  const name = row.find("td[data-stat=player] a").text().trim();
+  const id = row.find("td[data-stat=player]").attr("data-append-csv");
+  return { ...stats, name, id };
 };
 
 export const scrapeTeam = async (url) => {
-  openConnection();
+  await openConnection();
 
   if (!url.includes("https:")) {
     url = `${BASE_URL}${url}`;
   }
 
-  const response = await axios.get(url);
+  const response = await makeRequest(url);
 
-  const $ = cheerio.load(response.data);
+  const $ = load(response.data);
 
   const school_name = url.split("/")[5];
   const logo_url = $("img.teamlogo").attr("src");
@@ -36,7 +36,6 @@ export const scrapeTeam = async (url) => {
     const label = $(el).find("strong").text().replace(/\s/g, " ").trim();
     topStats[label] = $(el).text().replace(/\s/g, " ").trim().split(": ")[1];
   });
-  const record = topStats["Record:"].split(" ")[0];
   const coach = topStats["Coach:"];
   const scored = +topStats["PS/G:"].split(" ")[0];
   const allowed = +topStats["PA/G:"].split(" ")[0];
@@ -44,23 +43,50 @@ export const scrapeTeam = async (url) => {
   const sos = topStats["SOS:"] ? +topStats["SOS:"].split(" ")[0] : undefined;
   const o_rtg = +topStats["ORtg:"].split(" ")[0];
   const d_rtg = +topStats["DRtg:"].split(" ")[0];
-  const teamStatRow = $("#schools_per_game")
+  const fullRecord = topStats["Record:"].split(" ");
+  const record = fullRecord[0];
+  const conference = fullRecord.join(" ").split("in ")[1].slice(0, -1);
+  const teamStatRow = $("#season-total_per_game")
     .find("tbody")
     .find("tr:nth-child(1)");
+
 
   const players = $("#per_game")
     .find("tbody")
     .find("tr")
+    // console.log(school_name)
+    // console.log(playerRows.html())
     .map((idx, _el) => {
-      return scrapePlayerRow($(_el));
+      const stats = scrapePlayerRow($(_el));
+      return {
+        player_id: stats.id,
+        player_name: stats.name,
+        stats
+      };
     })
     .toArray();
   const stats = scrapeStatRow(teamStatRow);
+
+  for (const player of players) {
+    await Player.updateOne(
+      { id: player.player_id },
+      {
+        $set: {
+          id: player.player_id,
+          name: player.player_name,
+          team_id: school_name,
+          ...player.stats
+        },
+      },
+      { upsert: true }
+    );
+  }
 
   await Team.updateOne(
     { name: school_name },
     {
       $set: {
+        id: school_name,
         ...stats,
         points_allowed: allowed,
         sos,
@@ -74,7 +100,8 @@ export const scrapeTeam = async (url) => {
         wins: +record.split("-")[0],
         losses: +record.split("-")[1],
         year: 2021,
-        players,
+        conference,
+        player_ids: players.map((player) => player.player_id),
       },
     },
     { upsert: true }
