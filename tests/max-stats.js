@@ -32,6 +32,52 @@ const run = async () => {
     )
     .flat();
   const allTeams = (await Team.find({})).map((team) => team.toObject());
+  const allTeamGames = (await Game.find({}))
+    .map((game) => {
+      game = game.toObject();
+      const date = game.date;
+      const teams = game.teams.map((team) => {
+        return { ...team, date };
+      });
+      return teams;
+    })
+    .flat();
+  const allPlayerGames = (await Game.find({}))
+    .map((game) => {
+      game = game.toObject();
+      const date = game.date;
+      const players = game.teams.map((team) => {
+        return team.players.map((player) => {
+          return { ...player, date, team: team.team };
+        });
+      });
+      return players.flat();
+    })
+    .flat();
+
+  const teamGames = getMaxAverages(
+    allTeamGames,
+    (team, stat) => {
+      return {
+        value: team[stat],
+        team: team.team,
+        date: team.date,
+      };
+    },
+    { value: 0, date: 0, team: "" }
+  );
+  const playerGames = getMaxAverages(
+    allPlayerGames,
+    (player, stat) => {
+      return {
+        value: player[stat],
+        name: player.name,
+        date: player.date,
+        team: player.team,
+      };
+    },
+    { value: 0, name: "", date: 0, team: "" }
+  );
 
   const players = getMaxAverages(
     allPlayers,
@@ -45,9 +91,29 @@ const run = async () => {
     { value: 0, player: "", team: "" }
   );
 
+  Object.entries(teamGames).forEach(([stat, leaders]) => {
+    console.log(
+      `\n${leaders.length} teams achieved ${leaders[0].value} ${stat} in a game`
+    );
+    if (leaders.length < 20) {
+      leaders.forEach((leader) => {
+        console.log(`\t${leader.team} - ${leader.date}`);
+      });
+    }
+  });
+  Object.entries(playerGames).forEach(([stat, leaders]) => {
+    console.log(
+      `\n${leaders.length} players achieved ${leaders[0].value} ${stat} in a game`
+    );
+    if (leaders.length < 20) {
+      leaders.forEach((leader) => {
+        console.log(`\t${leader.name} - ${leader.team} \t ${leader.date}`);
+      });
+    }
+  });
   Object.entries(players).forEach(([stat, leaders]) => {
     console.log(
-      `\n${leaders.length} players achieved ${leaders[0].value} ${stat}`
+      `\n${leaders.length} players achieved ${leaders[0].value} ${stat} per game`
     );
     if (leaders.length < 20) {
       leaders.forEach((leader) => {
@@ -65,7 +131,7 @@ const run = async () => {
 
   Object.entries(teams).forEach(([stat, leaders]) => {
     console.log(
-      `\n${leaders.length} teams achieved ${leaders[0].value} ${stat}`
+      `\n${leaders.length} teams achieved ${leaders[0].value} ${stat} per game`
     );
     if (leaders.length < 20) {
       leaders.forEach((leader) => {

@@ -3,7 +3,7 @@ import cheerio from "cheerio";
 
 import { Team } from "../models/index.js";
 import { scrapeStatRow } from "./utils.js";
-import { openConnection, closeConnection } from "../database/util.js";
+import { openConnection } from "../database/util.js";
 
 const { BASE_URL } = process.env;
 
